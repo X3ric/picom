@@ -341,7 +341,7 @@ struct log_target *stderr_logger_new(void) {
 
 static void gl_string_marker_logger_write(struct log_target *tgt attr_unused,
                                           const char *str, size_t len) {
-	// strip newlines at the end of the string
+		// strip newlines at the end of the string
 	while (len > 0 && str[len - 1] == '\n') {
 		len--;
 	}
@@ -358,7 +358,7 @@ static const struct log_ops gl_string_marker_logger_ops = {
 /// such as apitrace
 struct log_target *gl_string_marker_logger_new(void) {
 	if (!epoxy_has_gl_extension("GL_GREMEDY_string_marker")) {
-		return NULL;
+				return NULL;
 	}
 
 	auto ret = cmalloc(struct log_target);

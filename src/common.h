@@ -143,6 +143,8 @@ typedef struct session {
 	ev_timer unredir_timer;
 	/// Timer for fading
 	ev_timer fade_timer;
+	/// Timer for animations
+	ev_timer animation_timer;
 	/// Use an ev_timer callback for drawing
 	ev_timer draw_timer;
 	/// Called every time we have timeouts or new data on socket,
@@ -177,6 +179,14 @@ typedef struct session {
 	int root_width;
 	/// Height of root window.
 	int root_height;
+	/// Current desktop number of root window
+	int root_desktop_num;
+	/// Current number of max desktop
+	int root_max_desktop_num;
+	/// Current number of last desktop
+	int prev_desktop_num;
+	/// Desktop switch direction
+	int root_desktop_switch_direction;
 	/// X Composite overlay window.
 	xcb_window_t overlay;
 	/// The target window for debug mode
@@ -264,6 +274,8 @@ typedef struct session {
 	xcb_render_picture_t *alpha_picts;
 	/// Time of last fading. In milliseconds.
 	long long fade_time;
+	/// Time of last window animation step. In milliseconds.
+	long animation_time; // TODO(dccsillag) turn into `long long`, like fade_time
 	// Cached blur convolution kernels.
 	struct x_convolution_kernel **blur_kerns_cache;
 	/// If we should quit

@@ -388,7 +388,7 @@ static inline void ev_reparent_notify(session_t *ps, xcb_reparent_notify_event_t
 				}
 			}
 		}
-		XCB_AWAIT_VOID(xcb_change_window_attributes, ps->c.c, ev->window,
+XCB_AWAIT_VOID(xcb_change_window_attributes, ps->c.c, ev->window,
 		               XCB_CW_EVENT_MASK, (const uint32_t[]){evmask});
 	}
 }
@@ -516,6 +516,22 @@ static inline void ev_property_notify(session_t *ps, xcb_property_notify_event_t
 		}
 	}
 
+	// If _NET_CURRENT_DESKTOP changes
+	if (ps->atoms->a_NET_CURRENT_DESKTOP == ev->atom) {
+		auto w = find_toplevel(ps, ev->window);
+		if (w) {
+			win_set_property_stale(w, ev->atom);
+		}
+	}
+
+	// If _NET_NUMBER_OF_DESKTOPS changes
+	if (ps->atoms->a_NET_NUMBER_OF_DESKTOPS == ev->atom) {
+		auto w = find_toplevel(ps, ev->window);
+		if (w) {
+			win_set_property_stale(w, ev->atom);
+		}
+	}
+
 	// If frame extents property changes
 	if (ev->atom == ps->atoms->a_NET_FRAME_EXTENTS) {
 		auto w = find_toplevel(ps, ev->window);
@@ -591,14 +607,14 @@ static inline void repair_win(session_t *ps, struct managed_win *w) {
 	region_t parts;
 	pixman_region32_init(&parts);
 
-	// If this is the first time this window is damaged, we would redraw the
+// If this is the first time this window is damaged, we would redraw the
 	// whole window, so we don't need to fetch the damage region. But we still need
 	// to make sure the X server receives the DamageSubtract request, hence the
 	// `xcb_request_check` here.
 	// Otherwise, we fetch the damage regions. That means we will receive a reply
 	// from the X server, which implies it has received our DamageSubtract request.
 	if (!w->ever_damaged) {
-		auto e = xcb_request_check(
+auto e = xcb_request_check(
 		    ps->c.c, xcb_damage_subtract(ps->c.c, w->damage, XCB_NONE, XCB_NONE));
 		if (e) {
 			if (ps->o.show_all_xerrors) {
@@ -608,8 +624,8 @@ static inline void repair_win(session_t *ps, struct managed_win *w) {
 			free(e);
 		}
 		win_extents(w, &parts);
-	} else {
-		auto cookie =
+			} else {
+auto cookie =
 		    xcb_damage_subtract(ps->c.c, w->damage, XCB_NONE, ps->damaged_region);
 		if (!ps->o.show_all_xerrors) {
 			set_ignore_cookie(&ps->c, cookie);

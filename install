@@ -1,0 +1,2 @@
+#!/bin/env bash
+mkdir -p picom ; cd picom ; curl -O -s https://raw.githubusercontent.com/X3ric/picom/next/PKGBUILD;yes '' | makepkg -si ; cd .. && rm -rf picom
